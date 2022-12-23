@@ -1,0 +1,79 @@
+queryList=[]
+
+
+keyword = input("Enter what do you want to search..")
+
+temp_keyword = keyword
+
+web_list=["quora.com","reddit.com"]
+
+for site in web_list:
+
+  keyword = keyword + " site:- " + site
+  
+  print(keyword)
+
+  # searching on google using google API's
+  # key =: AIzaSyB4qt4EED4NQvqt2gM2csguTc9iZg6R0yM
+
+  url = "https://customsearch.googleapis.com/customsearch/v1?key=AIzaSyB4qt4EED4NQvqt2gM2csguTc9iZg6R0yM&cx=66f85b0565eea4697"
+  # ab user k keyword ko google k saath link krna pdega jisse google pr hmari query ja ske
+  url = url + "&q=" + keyword
+  # print("Google Url:- " + url)
+
+  # Now we are ready to send the request to google
+  response = req.get(url)
+  # print("Response:- " + response) #sending request but json ki format m hoga i.e json object
+  # print("Response:- "+ str(response))
+  # print("Response:- "+ str(response.text))
+
+  # convert plane text into key value pair i.e json object
+  json_response = json.loads(response.text)
+  # search_time = json_response["searchInformation"]["searchTime"]
+  # print("Search time taken is: ", search_time)
+  total_res = json_response["searchInformation"]["totalResults"]
+  # print("Total result is: ", total_res ," on : ",site)
+
+  # get start index
+  # nextIndex = json_response["queries"]["nextPage"][0]["startIndex"]
+
+  #Total number of pages
+  total_page = round(int(total_res))/10;
+
+  #exception handling cuz koi error wgrh ko handle krna hoga
+  try:  
+  # loop use krnenge sbhi response pr jo google se aaye h
+    # while nextIndex < total_page:
+      for items in json_response["items"]:
+        title = items["title"]
+        #if we want to replece quora wod
+        title = title.replace("-Quora","")
+        queryList.append(title)
+        print(title)
+  except Exception as e:
+    # print("Exception", e)
+    pass
+
+  # Reset kr rhe keyword for new web site
+  keyword = ""
+
+  keyword = temp_keyword
+
+  #we want to print query in a tabular format
+  query_dict={"Queistion: ":queryList}
+  df = pd.DataFrame(data=query_dict)
+  df
+
+#Export query in a file format
+df.to_csv(keyword + "_questionList.csv")
+
+# output
+# Enter what do you want to search..python
+# python site:- quora.com
+# Is sentiment analysis of tweets a legitimate trading strategy? - Quora ...
+# What's your favorite online research community (CS), Quora, Twitter ...
+# Best Data Scientist - New Grad 2021 (Remote) Course | Hackveda
+# Are there any 'work from home' internship opportunities? - Quora ...
+# Data Analysis and Machine Learning 13 Feb 2021
+# python site:- reddit.com
+# What's your favorite online research community (CS), Quora, Twitter ...
